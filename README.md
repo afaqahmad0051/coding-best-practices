@@ -4,6 +4,8 @@
 
 [Single responsibility principle](#single-responsibility-principle)
 
+[Methods should do just one thing](#methods-should-do-just-one-thing)
+
 [Validation](#validation)
 
 ### **Single responsibility principle**
@@ -42,6 +44,49 @@ public function update(UpdateRequest $request): string
     $this->post->updateGeneralPost($request->validated());
 
     return back();
+}
+```
+
+[🔝 Back to contents](#contents)
+
+### **Methods should do just one thing**
+
+A function should do just one thing and do it well.
+
+Bad:
+
+```php
+public function getFullNameAttribute(): string
+{
+    if (Auth::user() && Auth::user()->hasRole('client') && Auth::user()->isVerified()) {
+        return 'Mr. ' . $this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name;
+    } else {
+        return $this->first_name[0] . '. ' . $this->last_name;
+    }
+}
+```
+
+Good:
+
+```php
+public function getFullNameAttribute(): string
+{
+    return $this->isVerifiedClient() ? $this->getFullNameLong() : $this->getFullNameShort();
+}
+
+public function isVerifiedClient(): bool
+{
+    return Auth::user() && Auth::user()->hasRole('client') && Auth::user()->isVerified();
+}
+
+public function getFullNameLong(): string
+{
+    return 'Mr. ' . $this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name;
+}
+
+public function getFullNameShort(): string
+{
+    return $this->first_name[0] . '. ' . $this->last_name;
 }
 ```
 
