@@ -8,6 +8,8 @@
 
 [Validation](#validation)
 
+[Business logic should be in service class](#business-logic-should-be-in-service-class)
+
 ### **Single responsibility principle**
 
 A class should have only one responsibility.
@@ -128,6 +130,46 @@ class PostRequest extends Request
             'body' => ['required'],
             'publish_at' => ['nullable', 'date'],
         ];
+    }
+}
+```
+
+[🔝 Back to contents](#contents)
+
+### **Business logic should be in service class**
+
+A controller must have only one responsibility, so move business logic from controllers to service classes.
+
+Bad:
+
+```php
+public function store(Request $request)
+{
+    if ($request->hasFile('image')) {
+        $request->file('image')->move(public_path('images') . 'temp');
+    }
+    
+    ...
+}
+```
+
+Good:
+
+```php
+public function store(Request $request)
+{
+    $this->articleService->handleUploadedImage($request->file('image'));
+
+    ...
+}
+
+class ArticleService
+{
+    public function handleUploadedImage($image): void
+    {
+        if (!is_null($image)) {
+            $image->move(public_path('images') . 'temp');
+        }
     }
 }
 ```
